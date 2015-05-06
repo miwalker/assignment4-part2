@@ -77,7 +77,7 @@ function displayVideos($mysqli) {
 	$tracker = 1;
 	$tracker2 = 0;
 	// array containing video categories for dropdown menu and removing duplicates
-	$catArray[0] = "All";
+	$catArray[0] = "All Movies";
 	// populates unfiltered table of video inventory
 	while ($stmt->fetch()) {
 		if ($out_rented == 1) {
@@ -186,7 +186,7 @@ function displayCategory($mysqli, $displayCategoryName) {
 	// displays category form to unapply filter
 	echo '<form action="videostore.php" method="post">
 			<select name="displayCategoryName">
-				<option value="All">All</option>
+				<option value="All Movies">All Movies</option>
 			</select>
 			<input type="hidden" name="displayCategory" value="display">
 			<input type="submit" value="Filter">
@@ -327,7 +327,7 @@ if ($_POST["checkoutVid"] == "checkout") {
 	toggleCheckOut($mysqli, $_POST["checkoutVidID"]);
 }
 // if category filter is applied that does not equal all
-if ($_POST["displayCategory"] == "display" && ($_POST["displayCategoryName"] != "All")) {
+if ($_POST["displayCategory"] == "display" && ($_POST["displayCategoryName"] != "All Movies")) {
 	displayCategory($mysqli, $_POST["displayCategoryName"]);
 }
 // displays all videos if no filter applied
@@ -342,7 +342,7 @@ echo '		</table>
 			<h3>Delete All Videos</h3>
 			<form action="videostore.php" method="post">
  				<input type="hidden" name="deleteAll" value="delete">
- 				<p><input type="submit" value="Delete"></p>
+ 				<p><input type="submit" value="Delete All Videos"></p>
 			</form>
  		</body>
  	</html>';
