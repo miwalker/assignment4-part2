@@ -81,17 +81,30 @@ function displayVideos($mysqli) {
 	$rentedYesNo;
 	while ($stmt->fetch()) {
 		if ($out_rented == 1) {
-			$rentedYesNo = "Yes";
+			$rentedYesNo = "Checked Out";
 		}
 		else {
-			$rentedYesNo = "No";
+			$rentedYesNo = "Available";
 		}
 		echo  " <tr>
 					<td>$out_name</td>
 					<td>$out_category</td>
 					<td>$out_length</td>
 					<td>$rentedYesNo</td>
-					<td>$rentedYesNo</td>
+					<td>
+						<form action=\"videostore.php\" method=\"post\">
+ 							<input type=\"hidden\" name=\"deleteSingle\" value=\"delete\">
+ 							<input type=\"hidden\" name=\"deleteSingleID\" value=\"$out_name\">
+ 							<input type=\"submit\" value=\"Delete\">
+						</form>
+					</td>
+					<td>
+						<form action=\"videostore.php\" method=\"post\">
+ 							<input type=\"hidden\" name=\"checkoutVid\" value=\"checkout\">
+ 							<input type=\"hidden\" name=\"checkoutVidID\" value=\"$out_name\">
+ 							<input type=\"submit\" value=\"Check-In/Check-Out\">
+						</form>
+					</td>
 				</tr>";
 		$tracker++;
 	}
@@ -99,12 +112,36 @@ function displayVideos($mysqli) {
 	return;
 }
 
-function toggleCheckOut($mysqli) {
+function toggleCheckOut($mysqli, $checkoutName) {
+	if (!($stmt = $mysqli->prepare("UPDATE VideoStore SET rented = NOT(rented) WHERE name=\"$checkoutName\""))) {
+		echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+		return;
+	}
 
+	// executes statement if no errors
+	if (!$stmt->execute()) {
+	    	echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+	    	return;
+		}
+	$stmt->close();
+	echo '*Video Status Updated*<br>';
+	return;
 }
 
-function deleteVideo($mysqli) {
+function deleteVideo($mysqli, $deleteName) {
+	if (!($stmt = $mysqli->prepare("DELETE FROM VideoStore WHERE name=\"$deleteName\""))) {
+		echo "Prepare failed: (" . $mysqli->errno . ") " . $mysqli->error;
+		return;
+	}
 
+	// executes statement if no errors
+	if (!$stmt->execute()) {
+	    	echo "Execute failed: (" . $stmt->errno . ") " . $stmt->error;
+	    	return;
+		}
+	$stmt->close();
+	echo '*Video Deleted*<br>';
+	return;
 }
 
 function deleteALL($mysqli) {
@@ -166,17 +203,25 @@ if (count($_POST) == 3) {
 
 echo '		<br>
 			<h3>Current Inventory</h3>
-			<table border="2">
+			<table border="1">
 				<tr>
 					<th>Name</th>
 					<th>Category</th>
 					<th>Length</th>
-					<th>Rented</th>
+					<th>Status</th>
+					<th>Delete Video</th>
+					<th>Check-In/Check-Out Video</th>
 				</tr>';
 
 
 if ($_POST["deleteAll"] == "delete") {
 	deleteALL($mysqli);
+}
+if ($_POST["deleteSingle"] == "delete") {
+	deleteVideo($mysqli, $_POST["deleteSingleID"]);
+}
+if ($_POST["checkoutVid"] == "checkout") {
+	toggleCheckOut($mysqli, $_POST["checkoutVidID"]);
 }
 displayVideos($mysqli);
 
@@ -190,14 +235,6 @@ echo '		</table>
 			</form>
  		</body>
  	</html>';
-
-
-
-
-
-
-
-
 
 
 ?>
